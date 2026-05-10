@@ -1,0 +1,21 @@
+[
+  {
+    "slug": "female-bachelor-cherry-vertical",
+    "title": "女生学士服樱花竖版",
+    "gender": "female",
+    "outfit": "bachelor_gown",
+    "season": "cherry_blossom",
+    "orientation": "vertical_poster",
+    "previewImageUrl": "/placeholders/template-previews/female-bachelor-cherry-vertical.jpg"
+  },
+  {
+    "slug": "male-bachelor-autumn-horizontal",
+    "title": "男生学士服秋日横版",
+    "gender": "male",
+    "outfit": "bachelor_gown",
+    "season": "autumn",
+    "orientation": "horizontal_wallpaper",
+    "previewImageUrl": "/placeholders/template-previews/male-bachelor-autumn-horizontal.jpg"
+  }
+]
+

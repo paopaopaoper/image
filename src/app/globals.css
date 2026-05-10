@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  body {
+    @apply bg-wash-50 text-ink-900 antialiased;
+    font-family: "Noto Serif SC", "Source Han Serif SC", "SimSun", serif;
+    margin: 0;
+  }
+
+  /* 链接基础样式 */
+  a {
+    @apply text-accent-deep underline-offset-2 transition-colors;
+  }
+
+  /* 选中文字颜色 */
+  ::selection {
+    @apply bg-accent-muted/30 text-ink-900;
+  }
+
+  /* 防止图片溢出视口 */
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+@layer components {
+  /* 页面合规标注横幅 */
+  .compliance-banner {
+    @apply bg-ink-50 text-xs text-ink-400 text-center py-1.5 px-4 leading-relaxed;
+  }
+}

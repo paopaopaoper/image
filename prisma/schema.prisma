@@ -1,0 +1,186 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ── 枚举 ──────────────────────────────────────────────
+
+enum GenerationStatus {
+  queued     @map("queued")
+  processing @map("processing")
+  succeeded  @map("succeeded")
+  failed     @map("failed")
+  canceled   @map("canceled")
+}
+
+enum SchoolAssetType {
+  badge             @map("badge")
+  landmark          @map("landmark")
+  name_stone        @map("name_stone")
+  teaching_building @map("teaching_building")
+  campus_scene      @map("campus_scene")
+}
+
+enum PaymentStatus {
+  pending  @map("pending")
+  paid     @map("paid")
+  refunded @map("refunded")
+  expired  @map("expired")
+  canceled @map("canceled")
+}
+
+enum StyleCategory {
+  photographic      @map("photographic")
+  classic_art       @map("classic_art")
+  digital_art       @map("digital_art")
+  illustration      @map("illustration")
+  style_3d          @map("style_3d")
+  chinese_style     @map("chinese_style")
+  vintage           @map("vintage")
+  creative_effects  @map("creative_effects")
+  ui_design         @map("ui_design")
+}
+
+// ── 模型 ──────────────────────────────────────────────
+
+model User {
+  id             String          @id @default(cuid())
+  phoneHash      String          @unique
+  role           String          @default("user")
+  isActive       Boolean         @default(true)
+  isBanned       Boolean         @default(false)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  generationJobs GenerationJob[]
+  dailyQuotas    DailyQuota[]
+  paymentOrders  PaymentOrder[]
+  sessions       Session[]
+  userAgreements UserAgreement[]
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+  user         User     @relation(fields: [userId], references: [id])
+
+  @@index([sessionToken])
+  @@index([userId])
+}
+
+model UserAgreement {
+  id       String   @id @default(cuid())
+  userId   String
+  version  Int
+  content  String
+  agreedAt DateTime @default(now())
+  user     User     @relation(fields: [userId], references: [id])
+
+  @@index([userId, version])
+}
+
+model OtpCode {
+  id        String    @id @default(cuid())
+  phoneHash String
+  codeHash  String
+  expiresAt DateTime
+  attempts  Int       @default(0)
+  consumedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([phoneHash, createdAt])
+}
+
+model DailyQuota {
+  id        String   @id @default(cuid())
+  userId    String
+  dateKey   String
+  usedCount Int      @default(0)
+  version   Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, dateKey])
+}
+
+model TemplatePreset {
+  id              String             @id @default(cuid())
+  slug            String             @unique
+  title           String
+  prompt          String             @default("")
+  templateImageKey String?
+  styleCategory   StyleCategory
+  previewImageKey String?
+  isActive        Boolean            @default(true)
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+  generationJobs  GenerationJob[]
+}
+
+model School {
+  id        String        @id @default(cuid())
+  name      String
+  aliases   String[]
+  assets    SchoolAsset[]
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@index([name])
+}
+
+model SchoolAsset {
+  id          String          @id @default(cuid())
+  schoolId    String
+  displayName String
+  type        SchoolAssetType
+  objectKey   String?
+  metadata    Json?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  school      School          @relation(fields: [schoolId], references: [id])
+}
+
+model GenerationJob {
+  id                  String           @id @default(cuid())
+  userId              String
+  templatePresetId    String
+  status              GenerationStatus @default(queued)
+  portraitObjectKeys  String   @default("[]")
+  schoolId            String?
+  customSchoolContext String?
+  customPrompt        String?
+  outputObjectKey     String?
+  errorReason         String?
+  retryCount          Int              @default(0)
+  maxRetries          Int              @default(3)
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+  user                User             @relation(fields: [userId], references: [id])
+  templatePreset      TemplatePreset   @relation(fields: [templatePresetId], references: [id])
+
+  @@index([userId, createdAt])
+  @@index([status, createdAt])
+  @@index([userId, portraitObjectKeys, templatePresetId])
+}
+
+model PaymentOrder {
+  id        String        @id @default(cuid())
+  userId    String
+  provider  String
+  status    PaymentStatus @default(pending)
+  amountFen Int
+  tradeNo   String?
+  paidAt    DateTime?
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  user      User          @relation(fields: [userId], references: [id])
+
+  @@index([userId, createdAt])
+}

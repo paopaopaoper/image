@@ -1,0 +1,14 @@
+[
+  {
+    "schoolName": "示例大学",
+    "aliases": ["示大"],
+    "assets": [
+      {
+        "displayName": "示例大学校名石",
+        "type": "name_stone",
+        "objectKey": "schools/example/name-stone.jpg"
+      }
+    ]
+  }
+]
+
